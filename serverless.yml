@@ -1,0 +1,76 @@
+service: serverless-prueba-star-wars
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  lambdaHashingVersion: '20221121'
+  environment:
+    DYNAMODB_TABLE: star-wars-api-list
+  httpApi:
+    cors: true
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource: "arn:aws:dynamodb:${aws:region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+
+functions:
+  create:
+    handler: src/create.create
+    events:
+      - httpApi:
+          path: /src
+          method: post
+
+  list:
+    handler: src/list.list
+    events:
+      - httpApi:
+          path: /src
+          method: get
+
+  get:
+    handler: src/get.get
+    events:
+      - httpApi:
+          path: /src/{id}
+          method: get
+
+  update:
+    handler: src/update.update
+    events:
+      - httpApi:
+          path: /src/{id}
+          method: put
+
+  delete:
+    handler: src/delete.delete
+    events:
+      - httpApi:
+          path: /src/{id}
+          method: delete
+
+resources:
+  Resources:
+    TodosDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: id
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}

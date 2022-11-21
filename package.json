@@ -1,0 +1,10 @@
+{
+  "name": "serverless-prueba-star-wars",
+  "version": "1.0.0",
+  "description": "Serverless CRUD service ",
+  "author": "Maicol FFSA",
+  "license": "MIT",
+  "dependencies": {
+    "uuid": "^2.0.3"
+  }
+}

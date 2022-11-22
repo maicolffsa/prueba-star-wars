@@ -30,6 +30,13 @@ functions:
           path: /create
           method: post
 
+  createpi:
+    handler: src/create_int.createPI
+    events:
+      - httpApi:
+          path: /createpi
+          method: post
+
   list:
     handler: src/list.listP
     events:

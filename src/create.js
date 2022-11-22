@@ -1,52 +1,90 @@
 'use strict';
 
-const uuid = require('uuid');
-const AWS = require('aws-sdk'); // eslint-disable-line import/no-extraneous-dependencies
+const { v4 } = require("uuid");
+const AWS = require("aws-sdk");
 
-const dynamoDb = new AWS.DynamoDB.DocumentClient();
+const middy = require("@middy/core");
+const httpJSONBodyParser = require("@middy/http-json-body-parser");
 
-module.exports.create = (event, context, callback) => {
-  const timestamp = new Date().getTime();
-  const data = JSON.parse(event.body);
-  if (typeof data.text !== 'string') {
+  const createP = async (event) => {
+
+  const dynamoDb = new AWS.DynamoDB.DocumentClient();
+  const id = v4();
+  const {director, episode_id, opening_crawl, producer, title} = event.body
+  if (director == null) {
     console.error('Validation Failed');
     callback(null, {
-      statusCode: 400,
-      headers: { 'Content-Type': 'text/plain' },
-      body: 'Couldn\'t create the todo item.',
+      statusCode: 301,
+      body: 'Director no puede estar vacío',
     });
     return;
   }
 
-  const params = {
-    TableName: process.env.DYNAMODB_TABLE,
-    Item: {
-      id: uuid.v1(),
-      text: data.text,
-      checked: false,
-      createdAt: timestamp,
-      updatedAt: timestamp,
-    },
-  };
+  if (episode_id == null) {
+    console.error('Validation Failed');
+    callback(null, {
+      statusCode: 302,
+      body: 'episodio no puede estar vacío',
+    });
+    return;
+  }
+
+  if (opening_crawl== null) {
+    console.error('Validation Failed');
+    callback(null, {
+      statusCode: 303,
+      body: 'opening_crawl no puede estar vacío',
+    });
+    return;
+  }
+
+  if (producer == null) {
+    console.error('Validation Failed');
+    callback(null, {
+      statusCode: 304,
+      body: 'producer no puede estar vacío',
+    });
+    return;
+  }
+
+  if (title == null) {
+    console.error('Validation Failed');
+    callback(null, {
+      statusCode: 305,
+      body: 'title no puede estar vacío',
+    });
+    return;
+  }
+
+
+  
+    const datarecept = {
+     
+        id,
+        director,
+        episode_id,
+        opening_crawl,
+        producer,
+        title,
+      
+    };
+  
+    dynamoDb.put({
+      TableName: process.env.DYNAMODB_TABLE,
+      Item: datarecept
+      
+    }).promise()
+  
+      return{
+      statusCode: 200,
+        body: JSON.stringify(datarecept),
+    }
+    
+    
 
   // write the todo to the database
-  dynamoDb.put(params, (error) => {
-    // handle potential errors
-    if (error) {
-      console.error(error);
-      callback(null, {
-        statusCode: error.statusCode || 501,
-        headers: { 'Content-Type': 'text/plain' },
-        body: 'Couldn\'t create the todo item.',
-      });
-      return;
-    }
-
-    // create a response
-    const response = {
-      statusCode: 200,
-      body: JSON.stringify(params.Item),
-    };
-    callback(null, response);
-  });
+ 
+};
+module.exports = {
+  createP: middy(createP).use(httpJSONBodyParser()),
 };

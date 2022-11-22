@@ -6,7 +6,7 @@ provider:
   runtime: nodejs14.x
   lambdaHashingVersion: '20221121'
   environment:
-    DYNAMODB_TABLE: star-wars-api-list
+    DYNAMODB_TABLE: star-wars-api-people
   httpApi:
     cors: true
   iam:
@@ -24,38 +24,38 @@ provider:
 
 functions:
   create:
-    handler: src/create.create
+    handler: src/create.createP
     events:
       - httpApi:
-          path: /src
+          path: /create
           method: post
 
   list:
-    handler: src/list.list
+    handler: src/list.listP
     events:
       - httpApi:
-          path: /src
+          path: /list
           method: get
 
   get:
-    handler: src/get.get
+    handler: src/get.getP
     events:
       - httpApi:
-          path: /src/{id}
+          path: /get/{id}
           method: get
 
   update:
-    handler: src/update.update
+    handler: src/update.updateP
     events:
       - httpApi:
-          path: /src/{id}
+          path: /update/{id}
           method: put
 
   delete:
-    handler: src/delete.delete
+    handler: src/delete.deleteP
     events:
       - httpApi:
-          path: /src/{id}
+          path: /delete/{id}
           method: delete
 
 resources:
